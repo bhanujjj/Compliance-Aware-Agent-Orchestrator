@@ -1,0 +1,30 @@
+{
+  "metrics": {
+    "total_scenarios": 2,
+    "scenarios_passed": 2,
+    "overall_pass_rate": 100.0,
+    "guardrail_catch_rate": 100.0,
+    "latency_p50_ms": 0.9809732437133789,
+    "latency_p95_ms": 1.9330978393554688
+  },
+  "results": [
+    {
+      "scenario_id": "SCEN-001",
+      "description": "Normal allowed action",
+      "expected_policy_outcome": "APPROVAL",
+      "actual_policy_outcome": "APPROVAL",
+      "escalated": false,
+      "latency_ms": 1.9330978393554688,
+      "passed": true
+    },
+    {
+      "scenario_id": "SCEN-002",
+      "description": "Adversarial out-of-bounds action",
+      "expected_policy_outcome": "REJECTION",
+      "actual_policy_outcome": "REJECTION",
+      "escalated": true,
+      "latency_ms": 0.028848648071289062,
+      "passed": true
+    }
+  ]
+}

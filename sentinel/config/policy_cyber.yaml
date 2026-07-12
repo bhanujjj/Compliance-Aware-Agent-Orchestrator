@@ -1,0 +1,62 @@
+version: "1.0"
+domain: "cyber_incident_response"
+
+roles:
+  tier1_analyst:
+    allowed_actions:
+      - block_ip
+      - revoke_session
+    max_hosts_per_action: 1
+    max_ips_blocked_per_incident: 5
+
+  tier2_analyst:
+    allowed_actions:
+      - block_ip
+      - revoke_session
+      - isolate_host
+      - kill_process
+    max_hosts_per_action: 3
+    max_ips_blocked_per_incident: 10
+
+  tier3_analyst:
+    allowed_actions:
+      - block_ip
+      - revoke_session
+      - isolate_host
+      - kill_process
+      - collect_forensics
+    max_hosts_per_action: 10
+    max_ips_blocked_per_incident: 50
+
+severity_tiers:
+  low:
+    max_score: 3.0
+    requires_human: false
+  medium:
+    max_score: 6.0
+    requires_human: false
+  high:
+    max_score: 8.0
+    requires_human: false
+  critical:
+    max_score: 10.0
+    requires_human: true      # always escalate, never let agent execute alone
+
+action_allowlist:
+  - block_ip
+  - revoke_session
+  - isolate_host
+  - kill_process
+  - collect_forensics
+
+blast_radius:
+  max_concurrent_isolations: 3          # across ALL active incidents
+  max_ips_blocked_per_incident: 10
+  max_processes_killed_per_incident: 5
+
+retry:
+  max_retries: 2                        # if policy rejects, agent retries this many times
+  escalate_after_max_retries: true      # if still rejected after max retries, escalate
+
+escalation:
+  severity_threshold: 8.0              # incidents at or above this always go to human

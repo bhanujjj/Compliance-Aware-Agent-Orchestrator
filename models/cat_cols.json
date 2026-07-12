@@ -1,0 +1,12 @@
+[
+  "ACK Flag Cnt",
+  "Dst Port",
+  "ECE Flag Cnt",
+  "FIN Flag Cnt",
+  "Fwd PSH Flags",
+  "PSH Flag Cnt",
+  "Protocol",
+  "RST Flag Cnt",
+  "SYN Flag Cnt",
+  "URG Flag Cnt"
+]
