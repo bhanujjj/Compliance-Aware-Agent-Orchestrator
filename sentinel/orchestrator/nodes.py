@@ -7,10 +7,13 @@ import sentinel.policy.engine
 from sentinel.gateway.mcp_client import MCPClient
 from sentinel.audit.logger import log_event_sync
 
+_threat_intel_agent = ThreatIntelAgent(top_k=2, use_stub=True)
+_response_agent = ResponseAgent(use_stub=False)
+_escalation_agent = EscalationAgent()
+
 
 def threat_intel_node(state: SentinelState) -> dict:
-    intel_agent = ThreatIntelAgent(top_k=2, use_stub=True)
-    result = intel_agent.map_incident(state["incident"])
+    result = _threat_intel_agent.map_incident(state["incident"])
     tech_id = result.best_match.technique_id if result.best_match else "None"
     return {
         "intel_result": result,
@@ -18,8 +21,7 @@ def threat_intel_node(state: SentinelState) -> dict:
     }
 
 def response_node(state: SentinelState) -> dict:
-    response_agent = ResponseAgent(use_stub=True)
-    result = response_agent.propose_action(state["incident"])
+    result = _response_agent.propose_action(state["incident"])
     
     # Dynamic Role Assignment based on severity
     severity = state["incident"].severity
@@ -104,8 +106,7 @@ def execution_node(state: SentinelState) -> dict:
     }
 
 def escalation_node(state: SentinelState) -> dict:
-    escalation_agent = EscalationAgent()
-    result = escalation_agent.evaluate(state["incident"], state["policy_decision"])
+    result = _escalation_agent.evaluate(state["incident"], state["policy_decision"])
     return {
         "escalation_result": result,
         "final_status": "ESCALATED",

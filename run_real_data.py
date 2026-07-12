@@ -25,7 +25,7 @@ def main():
     
     _log.info("ingesting_alerts", path=csv_path)
     ingestor = RealDataIngestor(csv_path)
-    real_alerts = ingestor.stream_alerts(multiplier=100)
+    real_alerts = ingestor.stream_alerts(multiplier=3)
     _log.info("ingestion_complete", alert_count=len(real_alerts))
     
     if not real_alerts:

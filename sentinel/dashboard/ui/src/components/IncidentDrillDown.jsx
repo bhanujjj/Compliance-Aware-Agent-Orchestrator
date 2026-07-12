@@ -43,8 +43,24 @@ export default function IncidentDrillDown({ incident, onBack }) {
           <p style={{ marginTop: 16 }}>Loading timeline...</p>
         ) : (
           <div className="timeline">
-            {events.map((evt, idx) => {
+            {events.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)).map((evt, idx) => {
               const isEscalated = evt.event_type === 'ESCALATION' || evt.event_type === 'REJECTION'
+              const isTrace = evt.event_type === 'TRACE'
+              
+              if (isTrace) {
+                return (
+                  <div key={evt.event_id || idx} className="timeline-event trace">
+                    <div className="timeline-dot" style={{ background: 'var(--text-muted)' }}></div>
+                    <div className="timeline-time" style={{ color: 'var(--text-muted)' }}>{new Date(evt.timestamp).toLocaleTimeString()} • {evt.actor}</div>
+                    <div className="timeline-content">
+                      <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-muted)' }}>
+                        ⚙ {evt.payload?.step || JSON.stringify(evt.payload)}
+                      </p>
+                    </div>
+                  </div>
+                )
+              }
+              
               return (
                 <div key={evt.event_id || idx} className={`timeline-event ${isEscalated ? 'escalated' : ''}`}>
                   <div className="timeline-dot"></div>

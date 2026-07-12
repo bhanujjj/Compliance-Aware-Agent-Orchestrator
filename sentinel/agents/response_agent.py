@@ -31,9 +31,8 @@ Summary: {incident.summary}
 Propose ONE remediation action. Respond with JSON only."""
 
 class ResponseAgent:
-    def __init__(self, use_stub: bool = True):
+    def __init__(self, use_stub: bool = False):
         self.use_stub = use_stub
-        # In Phase 2: self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
     def propose_action(self, incident: Incident) -> ProposedAction:
         """Returns a ProposedAction. Stub in Phase 1, real LLM in Phase 2."""
@@ -84,13 +83,16 @@ class ResponseAgent:
         url = "https://openrouter.ai/api/v1/chat/completions"
         headers = {
             "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://github.com/bhanujjj/Compliance-Aware-Agent-Orchestrator",
+            "X-Title": "Sentinel SOC Orchestrator"
         }
         
         prompt = self.build_prompt(incident)
         
         payload = {
-            "model": "openrouter/free",
+            "model": "mistralai/mistral-7b-instruct:free",
+            "temperature": 0.0,
             "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}

@@ -20,9 +20,8 @@ class SentinelSettings(BaseSettings):
         extra="ignore",       # ignore unknown env vars silently
     )
 
-    # ── Gemini / LLM ──────────────────────────────────────────────────────────
-    GEMINI_API_KEY: str = Field(default="", description="Google Gemini API key")
-    GEMINI_MODEL: str = Field(default="gemini-2.5-flash", description="Gemini model name")
+    # ── OpenRouter / LLM ──────────────────────────────────────────────────────
+    OPENROUTER_API_KEY: str = Field(default="", description="OpenRouter API key")
 
     # ── Paths ─────────────────────────────────────────────────────────────────
     PROJECT_ROOT: Path = Field(

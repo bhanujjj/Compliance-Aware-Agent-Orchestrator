@@ -2,6 +2,10 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from sentinel.orchestrator.graph import build_sentinel_graph
 from sentinel.models import Incident
 
+from datetime import datetime
+from sentinel.models import AuditEvent
+from sentinel.audit.logger import log_event_sync
+
 def run_parallel(incidents: list[Incident], max_workers: int = 16) -> list[dict]:
     graph = build_sentinel_graph()
     results = []
@@ -19,6 +23,17 @@ def run_parallel(incidents: list[Incident], max_workers: int = 16) -> list[dict]
             "final_status": "PENDING",
         }
         final_state = graph.invoke(initial_state)
+        
+        # Persist audit trail
+        for step in final_state.get("audit_trail", []):
+            log_event_sync(AuditEvent(
+                timestamp=datetime.utcnow(),
+                incident_id=inc.incident_id,
+                event_type="TRACE",
+                actor="LangGraph",
+                payload={"step": step}
+            ))
+            
         return {
             "incident_id": inc.incident_id,
             "final_status": final_state["final_status"],
