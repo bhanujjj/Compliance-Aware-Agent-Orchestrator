@@ -1,12 +1,8 @@
 import os
-import sqlite3
 from sentinel.data.ingestion import RealDataIngestor
 from sentinel.agents.investigation_agent import InvestigationAgent
-from sentinel.agents.threat_intel_agent import ThreatIntelAgent
-from sentinel.agents.response_agent import ResponseAgent
-from sentinel.agents.escalation_agent import EscalationAgent
+from sentinel.orchestrator.runner import run_parallel
 from sentinel.config.settings import settings
-from sentinel.main import process_incident_scenario
 from sentinel.audit.logger import fetch_events_sync
 from sentinel.logging_config import configure_logging
 import structlog
@@ -43,24 +39,7 @@ def main():
     _log.info("clustering_alerts_complete", incident_count=len(incidents))
 
     _log.info("governance_loop_started")
-    response_agent = ResponseAgent(use_stub=False)
-    intel_agent = ThreatIntelAgent(top_k=2, use_stub=True)
-    escalation_agent = EscalationAgent()
-
-    # Limit to 20 incidents to avoid hitting OpenRouter rate limits (free tier is often 20 RPM)
-    sample_incidents = incidents[:20]
-    for i, inc in enumerate(sample_incidents):
-        if i % 5 == 0 or i == len(sample_incidents) - 1:
-            _log.info("processing_incident", index=i+1, total=len(sample_incidents), attack_types=list(inc.attack_types))
-            
-        # Phase 3: Threat Intel RAG Mapping
-        intel_result = intel_agent.map_incident(inc)
-        
-        # Process through Policy Engine and MCP Gateway (from main.py)
-        process_incident_scenario(f"Real Dataset {i+1}", inc, response_agent)
-        
-        # Check escalation
-        esc_result = escalation_agent.evaluate(inc, None, db_path=db_path)
+    run_parallel(incidents, max_workers=8)
 
     events = fetch_events_sync()
     total = len(incidents)

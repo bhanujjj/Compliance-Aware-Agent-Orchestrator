@@ -212,7 +212,7 @@ def test_get_severity_tier():
     assert get_severity_tier(3.0, tiers) == "low"    # exactly at low boundary
     assert get_severity_tier(3.1, tiers) == "medium"  # just above low boundary
     assert get_severity_tier(6.0, tiers) == "medium"  # exactly at medium boundary
-    assert get_severity_tier(8.0, tiers) == "high"    # exactly at high boundary
+    assert get_severity_tier(8.0, tiers) == "critical" # 8.0+ is critical — requires human escalation
     assert get_severity_tier(8.1, tiers) == "critical"  # just above high boundary
 
 

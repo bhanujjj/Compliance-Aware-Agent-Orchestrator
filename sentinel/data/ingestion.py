@@ -17,8 +17,8 @@ def map_severity(label: str) -> float:
 
 def generate_synthetic_ip(identifier: str, is_src: bool = True) -> str:
     """Generate unique IPs so they don't cluster."""
-    import uuid
-    hash_val = int(hashlib.md5((identifier + str(uuid.uuid4())).encode()).hexdigest(), 16)
+    import hashlib
+    hash_val = int(hashlib.md5(identifier.encode()).hexdigest(), 16)
     if is_src:
         return f"203.0.113.{(hash_val % 254) + 1}"
     else:
@@ -48,6 +48,8 @@ class RealDataIngestor:
                     except:
                         ts = datetime.utcnow()
                         
+                    severity = ml_predict_severity(row, label=attack_type)
+                        
                     for i in range(multiplier):
                         src_ip = generate_synthetic_ip(f"{attack_type}_{i}", is_src=True)
                         dst_ip = generate_synthetic_ip(f"{attack_type}_{i}", is_src=False)
@@ -56,7 +58,7 @@ class RealDataIngestor:
                             src_ip=src_ip,
                             dst_ip=dst_ip,
                             attack_type=attack_type,
-                            severity_score=ml_predict_severity(row, label=attack_type),
+                            severity_score=severity,
                             timestamp=ts
                         ))
                         if len(alerts) >= 32891:

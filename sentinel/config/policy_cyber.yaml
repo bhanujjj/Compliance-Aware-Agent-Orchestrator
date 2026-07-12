@@ -36,7 +36,7 @@ severity_tiers:
     max_score: 6.0
     requires_human: false
   high:
-    max_score: 8.0
+    max_score: 7.9
     requires_human: false
   critical:
     max_score: 10.0
@@ -59,4 +59,4 @@ retry:
   escalate_after_max_retries: true      # if still rejected after max retries, escalate
 
 escalation:
-  severity_threshold: 8.0              # incidents at or above this always go to human
+  severity_threshold: 9.0              # incidents at or above this always go to human

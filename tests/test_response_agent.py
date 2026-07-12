@@ -41,5 +41,16 @@ def test_build_prompt_contains_incident_id():
 
 def test_llm_propose_raises_not_implemented():
     agent = ResponseAgent(use_stub=False)
-    with pytest.raises(NotImplementedError):
-        agent.propose_action(Incident(severity=3.0, attack_types=set(), src_ips=[]))
+    incident = Incident(
+        src_ips=["1.2.3.4"],
+        dst_ips=["10.0.0.1"],
+        attack_types=["SSH-Patator"],
+        severity=6.0,
+        summary="Test"
+    )
+    import os
+    if "OPENROUTER_API_KEY" in os.environ:
+        del os.environ["OPENROUTER_API_KEY"]
+        
+    result = agent.propose_action(incident)
+    assert result.action_type == "block_ip"

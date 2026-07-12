@@ -7,14 +7,6 @@ import sentinel.policy.engine
 from sentinel.gateway.mcp_client import MCPClient
 from sentinel.audit.logger import log_event_sync
 
-def investigation_node(state: SentinelState) -> dict:
-    intel_agent = ThreatIntelAgent(top_k=2, use_stub=True)
-    result = intel_agent.map_incident(state["incident"])
-    tech_id = result.best_match.technique_id if result.best_match else "None"
-    return {
-        "intel_result": result,
-        "audit_trail": state.get("audit_trail", []) + [f"ThreatIntel: Mapped to {tech_id}"]
-    }
 
 def threat_intel_node(state: SentinelState) -> dict:
     intel_agent = ThreatIntelAgent(top_k=2, use_stub=True)
@@ -28,6 +20,16 @@ def threat_intel_node(state: SentinelState) -> dict:
 def response_node(state: SentinelState) -> dict:
     response_agent = ResponseAgent(use_stub=True)
     result = response_agent.propose_action(state["incident"])
+    
+    # Dynamic Role Assignment based on severity
+    severity = state["incident"].severity
+    if severity >= 8.0:
+        result.role = "tier3_analyst"
+    elif severity >= 5.0:
+        result.role = "tier2_analyst"
+    else:
+        result.role = "tier1_analyst"
+        
     return {
         "proposed_action": result,
         "audit_trail": state.get("audit_trail", []) + [f"ResponseAgent: Proposed {result.action_type} on {result.target}"]
@@ -70,7 +72,8 @@ def policy_node(state: SentinelState) -> dict:
     }
 
 def execution_node(state: SentinelState) -> dict:
-    mcp_client = MCPClient(role="tier1_analyst")
+    role = state["proposed_action"].role
+    mcp_client = MCPClient(role=role)
     result = mcp_client.execute(state["proposed_action"])
     
     final_status = "MITIGATED" if result.success else "FAILED"
@@ -85,7 +88,7 @@ def execution_node(state: SentinelState) -> dict:
         payload={
             "action_type": state["proposed_action"].action_type,
             "target": state["proposed_action"].target,
-            "role": "tier1_analyst",
+            "role": role,
             "success": result.success,
             "message": result.message,
             "execution_result": result.__dict__

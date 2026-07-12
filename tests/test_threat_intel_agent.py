@@ -57,14 +57,17 @@ def test_query_contains_severity():
     assert "low severity" in result.query_used
 
 def test_build_query_standalone():
-    from sentinel.agents.threat_intel_agent import ThreatIntelAgent
-    incident = Incident(attack_types={"SSH-Patator"},
-                        src_ips=["1.2.3.4"], dst_ips=["10.0.0.1"],
-                        severity=5.0)
-    agent = ThreatIntelAgent()
-    q = agent._build_query(incident)
-    assert "SSH" in q or "brute" in q.lower()
-    assert "1.2.3.4" in q
+    agent = ThreatIntelAgent(use_stub=True)
+    inc = Incident(
+        src_ips=["1.2.3.4"],
+        dst_ips=["10.0.0.1"],
+        attack_types=["SSH-Patator"],
+        severity=6.5,
+        summary="Medium severity — active threat detected."
+    )
+    q = agent._build_query(inc)
+    assert "SSH-Patator" in q
+    assert "medium" in q.lower()
 
 def test_retriever_unavailable_returns_graceful_result():
     # Use use_stub=False but patch the retriever to not be ready
